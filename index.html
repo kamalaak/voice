@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Speech Recognition</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            var recording = false;
+            var recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+
+            $('#record-button').click(function() {
+                if (recording) {
+                    recognition.stop();
+                    recording = false;
+                    $(this).text('Start Recording');
+                } else {
+                    recognition.start();
+                    recording = true;
+                    $(this).text('Stop Recording');
+                }
+            });
+
+            recognition.onresult = function(event) {
+                var result = event.results[event.results.length - 1][0].transcript;
+                $('#text-area').val(result);
+            };
+
+            $('#submit-button').click(function() {
+                var text = $('#text-area').val();
+                $.ajax({
+                    url: '/speak',
+                    type: 'POST',
+                    data: { text: text },
+                    success: function(response) {
+                        $('#output-audio').attr('src', 'static/output.mp3');
+                        $('#output-audio')[0].play();
+                    }
+                });
+            });
+
+            $('#search-button').click(function() {
+                var query = $('#search-query').val();
+                $.ajax({
+                    url: '/search_wikipedia',
+                    type: 'POST',
+                    data: { query: query },
+                    success: function(response) {
+                        $('#search-result').text(response);
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>Speech Recognition</h1>
+    <button id="record-button">Start Recording</button>
+    <br><br>
+    <textarea id="text-area" rows="5" cols="50"></textarea>
+    <br><br>
+    <button id="submit-button">Speak</button>
+    <audio id="output-audio" controls></audio>
+    <br><br>
+    <input type="text" id="search-query">
+    <button id="search-button">Search Wikipedia</button>
+    <br><br>
+    <div id="search-result"></div>
+</body>
+</html>
