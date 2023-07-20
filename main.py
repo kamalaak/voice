@@ -4,6 +4,8 @@ import time
 import wikipedia
 
 
+
+
 def get_audio():
     r = sr.Recognizer()
     with sr.Microphone() as source:
